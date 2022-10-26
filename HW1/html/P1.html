@@ -1,0 +1,265 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>P1</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-10-05"><meta name="DC.source" content="P1.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><h2>Contents</h2><div><ul><li><a href="#2">1a. Solving a Linear System</a></li><li><a href="#3">1b. User Defined Suroutines</a></li><li><a href="#4">Testing</a></li><li><a href="#5">Subroutine Definition</a></li></ul></div><pre class="codeinput">clc; clear; close <span class="string">all</span>
+format <span class="string">shortEng</span>
+</pre><h2 id="2">1a. Solving a Linear System</h2><pre class="codeinput">alpha = sqrt(2)/2;
+A = zeros(13,13); <span class="comment">% Initialized with full zeros</span>
+
+A(1,2) = 1; A(1,6) = -1; <span class="comment">% Eqn. 1</span>
+A(2,3) = 1; <span class="comment">% Eqn. 2</span>
+A(3,1) = alpha; A(3,4) = -1; A(3,5) = -alpha; <span class="comment">% Eqn. 3</span>
+A(4,1) = alpha; A(4,3) = 1; A(4,5) = alpha; <span class="comment">% Eqn. 4</span>
+A(5,4) = 1; A(5,8) = -1; <span class="comment">% Eqn. 5</span>
+A(6,7) = 1; <span class="comment">% Eqn. 6</span>
+A(7,5) = alpha; A(7,6) = 1; A(7,9) = -alpha; A(7,10) = -1; <span class="comment">% Eqn. 7</span>
+A(8,5) = alpha; A(8,7) = 1; A(8,9) = alpha; <span class="comment">% Eqn. 8</span>
+A(9,10) = 1; A(9,13) = -1; <span class="comment">% Eqn. 9</span>
+A(10,11) = 1; <span class="comment">% Eqn. 10</span>
+A(11,8) = 1; A(11,9) = alpha; A(11,12) = -alpha; <span class="comment">% Eqn. 11</span>
+A(12,9) = alpha; A(12,11) = 1; A(12,12) = alpha; <span class="comment">% Eqn. 12</span>
+A(13,12) = alpha; A(13,13) = 1; <span class="comment">% Eqn. 13</span>
+
+
+b = [0, 10, 0, 0, 0, 0, 0, 15, 0, 20, 0, 0, 0]'; <span class="comment">% Non-homogenous Vector</span>
+
+f = linsolve(A,b)
+</pre><pre class="codeoutput">
+f =
+
+   -28.2843e+000
+    20.0000e+000
+    10.0000e+000
+   -30.0000e+000
+    14.1421e+000
+    20.0000e+000
+     0.0000e+000
+   -30.0000e+000
+     7.0711e+000
+    25.0000e+000
+    20.0000e+000
+   -35.3553e+000
+    25.0000e+000
+
+</pre><h2 id="3">1b. User Defined Suroutines</h2><h2 id="4">Testing</h2><pre class="codeinput"><span class="comment">%%%% i. Inner Product of b and f</span>
+myInnerProductResult = myInnerProduct(b,f)
+MATLABInnerProduct = dot(b,f)
+
+<span class="comment">%%%% Multiplication of A and f</span>
+myMatrixMultResult = myMatrixMult(A,f)
+MATLABMatrixMult = A*f
+
+<span class="comment">%%%% 2-Norm of f</span>
+my2NormResult = my2Norm(f)
+MATLAB2NormResult = norm(f)
+</pre><h2 id="5">Subroutine Definition</h2><pre class="codeinput"><span class="comment">%%%% i. Inner Product of b and f</span>
+<span class="keyword">function</span> inner_product = myInnerProduct(a,b) <span class="comment">% No input sanitation here. This is not a Comp. Sci class</span>
+    n = length(a);
+    inner_product = 0;
+    <span class="keyword">for</span> index = 1:n
+        inner_product = inner_product + a(index)*b(index);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">%%%% Multiplication of A and f</span>
+<span class="keyword">function</span> mat_mult = myMatrixMult(A,b) <span class="comment">% No input sanitation here. This is not a Comp. Sci class</span>
+    n = length(b);
+    mat_mult = zeros(n,1);
+    <span class="keyword">for</span> index = 1:n
+        mat_mult(index) = myInnerProduct(A(index,:),b);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="comment">%%%% 2-Norm of f</span>
+<span class="keyword">function</span> squared_norm = my2Norm(a) <span class="comment">% No input sanitation here.</span>
+    squared_norm = sqrt(myInnerProduct(a,a));
+<span class="keyword">end</span>
+</pre><pre class="codeoutput">
+myInnerProductResult =
+
+   250.0000e+000
+
+
+MATLABInnerProduct =
+
+   250.0000e+000
+
+
+myMatrixMultResult =
+
+     0.0000e+000
+    10.0000e+000
+    -1.7764e-015
+    -1.7764e-015
+     0.0000e+000
+     0.0000e+000
+     3.5527e-015
+    15.0000e+000
+     0.0000e+000
+    20.0000e+000
+     0.0000e+000
+     3.5527e-015
+     0.0000e+000
+
+
+MATLABMatrixMult =
+
+     0.0000e+000
+    10.0000e+000
+    -1.7764e-015
+    -1.7764e-015
+     0.0000e+000
+     0.0000e+000
+     3.5527e-015
+    15.0000e+000
+     0.0000e+000
+    20.0000e+000
+     0.0000e+000
+     3.5527e-015
+     0.0000e+000
+
+
+my2NormResult =
+
+    81.5475e+000
+
+
+MATLAB2NormResult =
+
+    81.5475e+000
+
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+clc; clear; close all
+format shortEng
+%% 1a. Solving a Linear System
+alpha = sqrt(2)/2;
+A = zeros(13,13); % Initialized with full zeros
+
+A(1,2) = 1; A(1,6) = -1; % Eqn. 1
+A(2,3) = 1; % Eqn. 2
+A(3,1) = alpha; A(3,4) = -1; A(3,5) = -alpha; % Eqn. 3
+A(4,1) = alpha; A(4,3) = 1; A(4,5) = alpha; % Eqn. 4
+A(5,4) = 1; A(5,8) = -1; % Eqn. 5
+A(6,7) = 1; % Eqn. 6
+A(7,5) = alpha; A(7,6) = 1; A(7,9) = -alpha; A(7,10) = -1; % Eqn. 7
+A(8,5) = alpha; A(8,7) = 1; A(8,9) = alpha; % Eqn. 8
+A(9,10) = 1; A(9,13) = -1; % Eqn. 9
+A(10,11) = 1; % Eqn. 10
+A(11,8) = 1; A(11,9) = alpha; A(11,12) = -alpha; % Eqn. 11
+A(12,9) = alpha; A(12,11) = 1; A(12,12) = alpha; % Eqn. 12
+A(13,12) = alpha; A(13,13) = 1; % Eqn. 13
+
+
+b = [0, 10, 0, 0, 0, 0, 0, 15, 0, 20, 0, 0, 0]'; % Non-homogenous Vector
+
+f = linsolve(A,b)
+
+%% 1b. User Defined Suroutines
+
+%%% Testing
+
+%%%% i. Inner Product of b and f
+myInnerProductResult = myInnerProduct(b,f)
+MATLABInnerProduct = dot(b,f)
+
+%%%% Multiplication of A and f
+myMatrixMultResult = myMatrixMult(A,f)
+MATLABMatrixMult = A*f
+
+%%%% 2-Norm of f
+my2NormResult = my2Norm(f)
+MATLAB2NormResult = norm(f)
+
+%%% Subroutine Definition
+
+%%%% i. Inner Product of b and f
+function inner_product = myInnerProduct(a,b) % No input sanitation here. This is not a Comp. Sci class
+    n = length(a);
+    inner_product = 0;
+    for index = 1:n
+        inner_product = inner_product + a(index)*b(index);
+    end
+end
+
+%%%% Multiplication of A and f
+function mat_mult = myMatrixMult(A,b) % No input sanitation here. This is not a Comp. Sci class
+    n = length(b);
+    mat_mult = zeros(n,1);
+    for index = 1:n
+        mat_mult(index) = myInnerProduct(A(index,:),b);
+    end
+end
+
+%%%% 2-Norm of f
+function squared_norm = my2Norm(a) % No input sanitation here.
+    squared_norm = sqrt(myInnerProduct(a,a));
+end
+##### SOURCE END #####
+--></body></html>
