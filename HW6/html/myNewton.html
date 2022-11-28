@@ -1,0 +1,323 @@
+
+<!DOCTYPE html
+  PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html><head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+   <!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      --><title>myNewton</title><meta name="generator" content="MATLAB 9.12"><link rel="schema.DC" href="http://purl.org/dc/elements/1.1/"><meta name="DC.date" content="2022-11-18"><meta name="DC.source" content="myNewton.m"><style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style></head><body><div class="content"><pre class="codeinput"><span class="keyword">function</span> [guess, error_log, traj] = myNewton(guess, grad, hess, tol)
+
+    MAX_ITER = 30;
+    dim = length(guess);
+    iter_count = 0;
+    prev_guess = guess;
+
+    error_log_temp = zeros(1,MAX_ITER);
+    traj_temp = zeros(dim,MAX_ITER);
+
+    <span class="keyword">while</span> true
+        iter_count = iter_count + 1;
+        currentH = hess(prev_guess);
+        currentGrad = grad(prev_guess);
+        update_vector = GaussElimination_PP(currentH, -currentGrad);
+        guess = prev_guess + update_vector;
+        error = my2Norm(update_vector);
+
+        error_log_temp(iter_count) = error;
+        traj_temp(:,iter_count) = guess;
+
+        <span class="keyword">if</span> error &lt; tol
+            error_log = error_log_temp(1:iter_count);
+            traj = traj_temp(:,1:iter_count);
+            <span class="keyword">return</span>
+        <span class="keyword">elseif</span> iter_count &gt;= MAX_ITER
+            error_log = error_log_temp(1:iter_count);
+            traj = traj_temp(:,1:iter_count);
+            warning(<span class="string">"Failure to Converge After Maximum Iteration"</span>)
+            <span class="keyword">return</span>;
+        <span class="keyword">end</span>
+        prev_guess = guess;
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> x = GaussElimination_PP(A,b)
+
+<span class="comment">% Gaussian Elimination with Partial Pivoting</span>
+n = size(A,1);
+zero_tol = 1e-8; <span class="comment">% Cannot use == to compare floating point number</span>
+
+<span class="keyword">for</span> pivot_index = 1:n <span class="comment">% Pivoting from column 1 to column n</span>
+
+    [max_pivot_abs, max_pivot_relative_index] = myAbsMax(A(pivot_index:end,pivot_index));
+    max_pivot_absolute_index = max_pivot_relative_index + pivot_index - 1;
+
+    <span class="keyword">if</span> max_pivot_abs &lt; zero_tol
+        <span class="keyword">continue</span>
+    <span class="keyword">end</span>
+
+    <span class="keyword">if</span> max_pivot_absolute_index ~= pivot_index
+        A([pivot_index, max_pivot_absolute_index],:) = A([max_pivot_absolute_index,pivot_index],:);
+        b([pivot_index, max_pivot_absolute_index]) = b([max_pivot_absolute_index,pivot_index]);
+    <span class="keyword">end</span>
+
+    pivot = A(pivot_index,pivot_index);
+
+    <span class="keyword">for</span> elim_row_index = (pivot_index+1):n <span class="comment">% start eliminating rows below the current pivot</span>
+
+        multiplier = A(elim_row_index,pivot_index)/pivot; <span class="comment">% calculating multiplier</span>
+
+        A(elim_row_index,pivot_index) = 0; <span class="comment">%% Save 1 calculation, we already know that this should be zero</span>
+
+        <span class="keyword">for</span> elim_col_index = (pivot_index+1):n
+            A(elim_row_index,elim_col_index) = A(elim_row_index,elim_col_index) - A(pivot_index,elim_col_index)*multiplier;
+        <span class="keyword">end</span>
+
+        b(elim_row_index) = b(elim_row_index) - b(pivot_index)*multiplier;
+
+    <span class="keyword">end</span>
+
+<span class="keyword">end</span>
+
+<span class="comment">% disp("DEBUG: Partial Pivoting U =")</span>
+<span class="comment">% A</span>
+
+x = myBackSubstitution(A,b);
+
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> x = myBackSubstitution(A_upper,b)
+<span class="comment">% myBackSubstitution: personal implementation of back-substitution</span>
+
+    n = length(b); <span class="comment">% Calculate Working Dimension</span>
+    x = zeros(n,1); <span class="comment">% Allocation for Result Vector</span>
+    <span class="keyword">for</span> subStep = n:-1:1 <span class="comment">% Reverse Indexing From n to 1</span>
+        <span class="comment">% Residual = Dot product of sub-vector on the right of the diagonal</span>
+        <span class="comment">% entry and the sub-vector of known x entries</span>
+        residual = myInnerProduct(A_upper(subStep,subStep+1:n),x(subStep+1:n));
+        <span class="comment">% x at the current row = b at the current row - residual, then</span>
+        <span class="comment">% divided by diagonal entry</span>
+        x(subStep) = (b(subStep)-residual)/A_upper(subStep,subStep);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> [maxVal, maxIndex] = myAbsMax(number_array)
+<span class="comment">% Given a 1D array, find the number with the maximum magnitude and its</span>
+<span class="comment">% index inside the array</span>
+maxVal = -1;
+maxIndex = -1;
+<span class="keyword">for</span> numberIndex = 1:length(number_array)
+    current = abs(number_array(numberIndex));
+    <span class="keyword">if</span> current &gt; maxVal
+        maxVal = current;
+        maxIndex = numberIndex;
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> squared_norm = my2Norm(a)
+<span class="comment">% my2Norm: dot a vector with itself and take the square root</span>
+    squared_norm = sqrt(myInnerProduct(a,a));
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> inner_product = myInnerProduct(a,b)
+<span class="comment">% myInnerProduct: Calculate the inner product between two 1D arrays</span>
+    n = length(a);
+    inner_product = 0;
+    <span class="keyword">for</span> index = 1:n
+        inner_product = inner_product + a(index)*b(index);
+    <span class="keyword">end</span>
+<span class="keyword">end</span>
+</pre><pre class="codeoutput error">Not enough input arguments.
+
+Error in myNewton (line 4)
+    dim = length(guess);
+</pre><p class="footer"><br><a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2022a</a><br></p></div><!--
+##### SOURCE BEGIN #####
+function [guess, error_log, traj] = myNewton(guess, grad, hess, tol)
+
+    MAX_ITER = 30;
+    dim = length(guess);
+    iter_count = 0;
+    prev_guess = guess;
+
+    error_log_temp = zeros(1,MAX_ITER);
+    traj_temp = zeros(dim,MAX_ITER);
+
+    while true
+        iter_count = iter_count + 1;
+        currentH = hess(prev_guess);
+        currentGrad = grad(prev_guess);
+        update_vector = GaussElimination_PP(currentH, -currentGrad);
+        guess = prev_guess + update_vector;
+        error = my2Norm(update_vector);
+
+        error_log_temp(iter_count) = error;
+        traj_temp(:,iter_count) = guess;
+
+        if error < tol
+            error_log = error_log_temp(1:iter_count);
+            traj = traj_temp(:,1:iter_count);
+            return
+        elseif iter_count >= MAX_ITER
+            error_log = error_log_temp(1:iter_count);
+            traj = traj_temp(:,1:iter_count);
+            warning("Failure to Converge After Maximum Iteration")
+            return;
+        end
+        prev_guess = guess;
+    end
+
+end
+
+function x = GaussElimination_PP(A,b)
+
+% Gaussian Elimination with Partial Pivoting
+n = size(A,1);
+zero_tol = 1e-8; % Cannot use == to compare floating point number
+
+for pivot_index = 1:n % Pivoting from column 1 to column n
+
+    [max_pivot_abs, max_pivot_relative_index] = myAbsMax(A(pivot_index:end,pivot_index));
+    max_pivot_absolute_index = max_pivot_relative_index + pivot_index - 1;
+
+    if max_pivot_abs < zero_tol
+        continue
+    end
+
+    if max_pivot_absolute_index ~= pivot_index
+        A([pivot_index, max_pivot_absolute_index],:) = A([max_pivot_absolute_index,pivot_index],:);
+        b([pivot_index, max_pivot_absolute_index]) = b([max_pivot_absolute_index,pivot_index]);
+    end
+    
+    pivot = A(pivot_index,pivot_index);
+    
+    for elim_row_index = (pivot_index+1):n % start eliminating rows below the current pivot
+
+        multiplier = A(elim_row_index,pivot_index)/pivot; % calculating multiplier
+
+        A(elim_row_index,pivot_index) = 0; %% Save 1 calculation, we already know that this should be zero
+     
+        for elim_col_index = (pivot_index+1):n
+            A(elim_row_index,elim_col_index) = A(elim_row_index,elim_col_index) - A(pivot_index,elim_col_index)*multiplier;
+        end
+
+        b(elim_row_index) = b(elim_row_index) - b(pivot_index)*multiplier;
+
+    end
+
+end
+
+% disp("DEBUG: Partial Pivoting U =")
+% A
+
+x = myBackSubstitution(A,b);
+
+end
+
+function x = myBackSubstitution(A_upper,b)
+% myBackSubstitution: personal implementation of back-substitution
+
+    n = length(b); % Calculate Working Dimension
+    x = zeros(n,1); % Allocation for Result Vector
+    for subStep = n:-1:1 % Reverse Indexing From n to 1
+        % Residual = Dot product of sub-vector on the right of the diagonal
+        % entry and the sub-vector of known x entries
+        residual = myInnerProduct(A_upper(subStep,subStep+1:n),x(subStep+1:n));
+        % x at the current row = b at the current row - residual, then
+        % divided by diagonal entry
+        x(subStep) = (b(subStep)-residual)/A_upper(subStep,subStep);
+    end
+end
+
+function [maxVal, maxIndex] = myAbsMax(number_array)
+% Given a 1D array, find the number with the maximum magnitude and its
+% index inside the array
+maxVal = -1;
+maxIndex = -1;
+for numberIndex = 1:length(number_array)
+    current = abs(number_array(numberIndex));
+    if current > maxVal
+        maxVal = current;
+        maxIndex = numberIndex;
+    end
+end
+end
+
+function squared_norm = my2Norm(a)
+% my2Norm: dot a vector with itself and take the square root
+    squared_norm = sqrt(myInnerProduct(a,a));
+end
+
+function inner_product = myInnerProduct(a,b)
+% myInnerProduct: Calculate the inner product between two 1D arrays
+    n = length(a);
+    inner_product = 0;
+    for index = 1:n
+        inner_product = inner_product + a(index)*b(index);
+    end
+end
+##### SOURCE END #####
+--></body></html>

@@ -1,0 +1,59 @@
+clc; clear; close all;
+%%
+TS = 0;
+T0 = 1;
+alpha = 20;
+L = 1;
+unknownDim = 999;
+Q_expr = @(x) 200*x*(x-1);
+%%
+h = L/(unknownDim + 2 - 1);
+A = AConstructor(unknownDim,alpha,h);
+b = BConstructor(unknownDim,h,T0,TS,Q_expr);
+%%
+figure;
+contourf(A(1:50,1:50))
+xlabel("Column Index")
+ylabel("Row Index")
+set(gca,"YDir","reverse")
+title("Visualization of A Matrix's Banded Pattern");
+
+%%
+T_profile = GaussElimination_NP(A,b);
+MATLAB_T_profile = mldivide(A,b);
+difference = T_profile(abs(T_profile - MATLAB_T_profile) > 1e-12)
+
+%%
+x_vector = h*(0:unknownDim + 2 -1);
+T_vector = [T0 T_profile' TS];
+
+figure;
+plot(x_vector, T_vector, "DisplayName","Finite Difference Approximation"); hold on;
+xlabel("Distance from Fixed End");
+ylabel("Temperature");
+title("Numerical Solution for Fin's Temperature Profile");
+grid on; grid minor
+
+%%
+syms alpha_sym real
+coeff_vector = simplify(expand([1 1;exp(alpha_sym) exp(-alpha_sym)]\[1+2*200/alpha_sym^4;2*200/alpha_sym^4]));
+alpha_sym = alpha;
+coeff_vector = double(subs(coeff_vector, alpha));
+C1 = coeff_vector(1);
+C2 = coeff_vector(2);
+C3 = (-1/alpha^2)*200; 
+C4 = (1/alpha^2)*200;
+C5 = (-2/alpha^4)*200;
+
+analytical_sol = @(x) C1.*exp(alpha.*x) + C2.*exp(-alpha.*x) + C3*x.^2 + C4.*x + C5;
+analytical_sol_vector = analytical_sol(x_vector);
+
+plot(x_vector, analytical_sol_vector,"--","DisplayName","Analytical Solution");
+legend(Location="best")
+
+figure;
+semilogy(x_vector, abs(analytical_sol_vector-T_vector))
+title("Error Between Analytical and Finite Difference Solution")
+xlabel("Distance from Fixed End");
+ylabel("|True - Approx.|");
+grid on; grid minor;
